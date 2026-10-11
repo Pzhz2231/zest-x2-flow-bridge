@@ -26,7 +26,6 @@ Flow 调用会产生所选 Flow 应用的模型及其内部知识检索费用。
 使用当前 Managed Agent 会话中的 `bash` 工具。脚本仅在当前 Skill 目录运行，输入为 JSON，从标准输入传入：
 
 ```bash
-cd /root/workspace/skills/zest-flow-routing
 python3 flow_call.py simple <<'ZEST_FLOW_INPUT'
 {"task":"任务正文","audience":"受众","channel":"渠道或体裁","length":"篇幅","constraints":"硬约束","theory_summary":"必要时填写，否则留空"}
 ZEST_FLOW_INPUT
