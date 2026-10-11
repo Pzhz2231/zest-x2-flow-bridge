@@ -13,7 +13,7 @@ Run the server only as a Bailian Managed Agent MCP service with a session bound 
 
 ## Bailian deployment
 
-Bailian's custom MCP script deployment installs a public `uvx` package. The source here is prepared for review but has not been published or deployed. Add only this service to Zest and expose its two allowlisted tools. Bind the Vault containing `DASHSCOPE_API_KEY` to each session that may use this MCP. The current Vault credential allows `*.aliyuncs.com`; its value is never included in MCP configuration, source code, or a prompt.
+Bailian's custom MCP script deployment installs a public `uvx` package. This source is published in the `v0.1.0` GitHub release; the Bailian service still needs to be deployed and attached to Zest. Add only this service to Zest and expose its two allowlisted tools. Bind the Vault containing `DASHSCOPE_API_KEY` to each session that may use this MCP. The credential value is never included in MCP configuration, source code, or a prompt.
 
 ## Cost behavior
 
