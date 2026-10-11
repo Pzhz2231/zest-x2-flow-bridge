@@ -1,20 +1,31 @@
-# Zest Flow Agent MCP Bridge
+# Zest Flow Routing Skill
 
-This stdio MCP package exposes exactly two tools and hard-codes only the two verified published app IDs:
+This repository contains an Alibaba Cloud Bailian Managed Agent Skill for routing Zest text tasks to the user's two existing X² Flow Apps:
 
-- `x2_text_simple` → X²Agent 1.1 Test (`ba86217448de4d49bafa80c956eec8ae`)
-- `x2_text_complex` → Test3_ZJXJDMX_20260519 / X² 1.0 (`578f133457ba468b82eec09d21e6c0b9`)
+- `simple` → X²Agent 1.1Pro, App ID `ba86217448de4d49bafa80c956eec8ae`
+- `complex` → X² 1.0 / Test3, App ID `578f133457ba468b82eec09d21e6c0b9`
 
-The bridge sends a compact prompt brief to the selected Flow App completion API. It does not create a third text tier, call both apps for one request, inspect conversation history, or change either app's RAG configuration. It rejects oversized inputs and empty outputs. The session environment must contain the Vault placeholder `${DASHSCOPE_API_KEY}`. The request uses it as a Bearer token so Bailian's Managed Agent credential gateway can substitute the saved credential for the allowlisted host; the bridge never reads or stores the actual key.
+The Skill runs `flow_call.py` from within the Managed Agent session sandbox. It sends one compact task brief to one allowlisted Flow App and returns the actual `output.text`. It does not change either app's RAG settings, call both tiers for one task, or retry a failed/empty result.
 
-## Run locally
+## Bailian installation
 
-Run the server only as a Bailian Managed Agent MCP service with a session bound to the Vault containing `DASHSCOPE_API_KEY`. Bailian injects the literal placeholder into the process environment; the outbound gateway replaces it only in the Authorization header for an allowed host. A local model call will not resolve the placeholder and must not be used as a credential test.
+1. Package `SKILL.md` and `flow_call.py` at the ZIP root.
+2. Upload the ZIP through Bailian Skill Manager, wait for its review, then bind the resulting Skill to Zest.
+3. Bind a Bailian Vault containing the `DASHSCOPE_API_KEY` credential to the Managed Agent session. The sandbox receives only `BMA_SECRET_PLACEHOLDER_DASHSCOPE_API_KEY`; keep the real credential in Vault.
+4. Allow outbound credential substitution only for the required DashScope host. The helper sends the placeholder solely in the HTTPS `Authorization` header and retains default TLS certificate verification.
+5. Require user approval before every Flow API request. Do not test by calling a Flow App without separate approval for that specific call.
 
-## Bailian deployment
+The helper uses only Python's standard library. It defaults to no theory summary so each Flow App can use its existing RAG. Add a short, sourced summary only when the user explicitly supplies required material that the Flow cannot retrieve itself.
 
-Bailian's custom MCP script deployment installs a public `uvx` package. This source is published in the `v0.1.0` GitHub release; the Bailian service still needs to be deployed and attached to Zest. Add only this service to Zest and expose its two allowlisted tools. Bind the Vault containing `DASHSCOPE_API_KEY` to each session that may use this MCP. The credential value is never included in MCP configuration, source code, or a prompt.
+## Important: historical MCP prototype
 
-## Cost behavior
+The `v0.1.0` tag is a historical stdio MCP/Function Compute prototype. **Do not deploy it.** A separately deployed custom MCP process does not inherit the Managed Agent session's Vault, so its credential path was not verified. The supported design is this in-session Skill; the repository no longer publishes an `uvx` MCP server.
 
-The service makes no startup or health-check model calls. One tool call makes one Flow App API request, which can incur the selected app's model/RAG charges. Zest should dispatch once and should not retry an empty result more than once.
+## Cost and acceptance
+
+Each Flow API request may incur that Flow App's model and retrieval charges. Charges can apply even when the request fails. This repository does not claim a tested price, successful live call, token reduction measurement, or end-to-end acceptance. Obtain the current price and user approval before a live test.
+
+## Source files
+
+- `SKILL.md` — routing, approval, compact-context, output, retry, and Vault rules.
+- `flow_call.py` — fixed App ID allowlist and single-request HTTPS helper.
